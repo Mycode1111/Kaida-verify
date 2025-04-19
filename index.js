@@ -34,6 +34,13 @@ function isValidUrl(url) {
 client.on("ready", async () => {
   console.log("BOT online !");
   let channel = `${config.channelId}`;
+
+  // ✅ ถ้าไม่มี id.json ให้สร้างใหม่
+  const idJsonPath = 'id.json';
+  if (!fs.existsSync(idJsonPath)) {
+    fs.writeFileSync(idJsonPath, JSON.stringify({ messageID: "" }, null, 2));
+  }
+
   const embed = new EmbedBuilder()
     .setAuthor({
       name: `${config.main.title}`,
@@ -54,7 +61,7 @@ client.on("ready", async () => {
     .setStyle(`${config.main.button_style}`);
 
   const row = new ActionRowBuilder().addComponents(x);
-  const rawData = fs.readFileSync('id.json');
+  const rawData = fs.readFileSync(idJsonPath);
   const data = JSON.parse(rawData);
   const channels = await client.channels.fetch(config.channelId);
 
@@ -63,16 +70,14 @@ client.on("ready", async () => {
       .get(channel)
       .send({ embeds: [embed], components: [row] });
     data.messageID = message.id;
-    const newData = JSON.stringify(data);
-    fs.writeFileSync('id.json', newData);
+    fs.writeFileSync(idJsonPath, JSON.stringify(data, null, 2));
   } else {
     try {
       const messages = await channels.messages.fetch(data.messageID);
       messages.edit({ embeds: [embed], components: [row] });
     } catch (s) {
       data.messageID = '';
-      const newData = JSON.stringify(data);
-      fs.writeFileSync('id.json', newData);
+      fs.writeFileSync(idJsonPath, JSON.stringify(data, null, 2));
       await client.channels.cache
         .get(channel)
         .send({ embeds: [embed], components: [row] });
