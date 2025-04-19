@@ -132,7 +132,39 @@ client.on("interactionCreate", async (interaction) => {
       await interaction.showModal(modal);
     }
 
-    // Logic อื่น ๆ ที่มีอยู่
+    if (interaction.customId === "addRoles") {
+      // เมื่อแอดมินกดยืนยัน
+      const username = interaction.message.embeds[0].description.split("\n")[2].split("`")[1];
+      const roblox = interaction.message.embeds[0].description.split("\n")[5].split("`")[1];
+
+      const member = await interaction.guild.members.fetch(interaction.message.mentions.users.first().id);
+
+      // เพิ่มบทบาทหรือดำเนินการตามที่ต้องการที่นี่
+      await member.roles.add(config.roleVerified); // ตัวอย่างการเพิ่มบทบาท
+
+      const confirmEmbed = new EmbedBuilder()
+        .setDescription(`ยืนยันแล้ว: ${username} (${roblox})`)
+        .setColor("Green");
+
+      await interaction.update({
+        content: "คำขอได้รับการยืนยันแล้ว!",
+        embeds: [confirmEmbed],
+        components: [], // ปิดปุ่ม
+      });
+    }
+
+    if (interaction.customId === "Cancel") {
+      // เมื่อแอดมินกดยกเลิก
+      const cancelEmbed = new EmbedBuilder()
+        .setDescription("คำขอถูกยกเลิก")
+        .setColor("Red");
+
+      await interaction.update({
+        content: "คำขอถูกยกเลิก",
+        embeds: [cancelEmbed],
+        components: [], // ปิดปุ่ม
+      });
+    }
   }
 
   if (interaction.isModalSubmit()) {
@@ -176,7 +208,7 @@ client.on("interactionCreate", async (interaction) => {
       const adminEmbed = new EmbedBuilder()
         .setDescription(`# รายละเอียด
 **ดิสคอร์ดผู้ส่ง**
-<@${interaction.member?.id}>
+<@${interaction.member?.id}> 
 
 ชื่อ
 \`\`\`👤 ${username}\`\`\`
