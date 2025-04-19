@@ -22,27 +22,6 @@ const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
 });
 
-// ข้อความที่ต้องการหมุนเปลี่ยน
-const customMessages = [
-  "Kaida Verify ready!💚",
-  "Made by wasd.",
-];
-
-// ตั้งค่าลูปหมุนข้อความทุก 10 วินาที
-let currentIndex = 0;
-const rotateCustomActivity = () => {
-  const currentMessage = customMessages[currentIndex];
-  client.user.setPresence({
-    activities: [{ name: currentMessage, type: ActivityType.Custom }],
-    status: 'online',
-  });
-
-  // เปลี่ยนไปยังข้อความถัดไปใน array
-  currentIndex = (currentIndex + 1) % customMessages.length;
-};
-
-// เริ่มหมุนสถานะ
-setInterval(rotateCustomActivity, 5000);  // เปลี่ยนสถานะทุกๆ 10 วินาที
 
 client.on("ready", async () => {  // แก้ไขให้เป็น async function
   console.log("บอทออนไลน์แล้ว!");
@@ -206,6 +185,17 @@ client.on("interactionCreate", async (interaction) => {
       await interaction.update({ components: [] });
     }
   }
+
+  @Override
+  public void onReady(ReadyEvent event) {
+      // เมื่อบอทพร้อมใช้งาน
+      System.out.println("✅ Logged in as " + event.getJDA().getSelfUser().getName());
+
+      // ตั้งกิจกรรมให้บอท
+      event.getJDA().getPresence().setActivity(Activity.streaming("Kaida", "https://www.youtube.com/watch?v=bH3vMDK_Hn0"));
+      
+      // ตั้งสถานะของบอทเป็น Idle
+      event.getJDA().getPresence().setStatus(net.dv8tion.jda.api.entities.Status.IDLE);
 });
 
 client.login(config.token);
