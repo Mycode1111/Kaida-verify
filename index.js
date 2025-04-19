@@ -1,4 +1,5 @@
-require("dotenv").config(); 
+
+require("dotenv").config();
 const keepAlive = require('./keep_alive');
 keepAlive();
 
@@ -12,8 +13,6 @@ const {
   TextInputBuilder,
   TextInputStyle,
   GatewayIntentBits,
-  ActivityType,
-  Status,
 } = require("discord.js");
 
 const editJsonFile = require("edit-json-file");
@@ -36,31 +35,8 @@ const client = new Client({
   ],
 });
 
-// ข้อความที่ต้องการหมุนเปลี่ยน
-const customMessages = [
-  "Kaida Verify ready!💚",
-  "Made by wasd.",
-];
-
-// ตั้งค่าลูปหมุนข้อความทุก 5 วินาที
-let currentIndex = 0;
-const rotateCustomActivity = () => {
-  const currentMessage = customMessages[currentIndex];
-  client.user.setPresence({
-    activities: [{ name: currentMessage, type: ActivityType.Custom }],
-    status: 'online', // ตั้งค่าเป็น "ออนไลน์" 
-  });
-
-  // เปลี่ยนไปยังข้อความถัดไปใน array
-  currentIndex = (currentIndex + 1) % customMessages.length;
-};
-
-// เริ่มหมุนสถานะ
-setInterval(rotateCustomActivity, 5000);  // เปลี่ยนสถานะทุกๆ 5 วินาที
-
 client.on("ready", async () => {
   console.log("บอทออนไลน์แล้ว!");
-  rotateCustomActivity(); // เริ่มต้นหมุนสถานะทันทีหลังจากบอทออนไลน์
   client.user.setActivity("Kaida Verify💚", { type: 0 });
 
   const channel = await client.channels.fetch(config.channelId).catch(err => {
@@ -155,6 +131,8 @@ client.on("interactionCreate", async (interaction) => {
 
       await interaction.showModal(modal);
     }
+
+    // Logic อื่น ๆ ที่มีอยู่
   }
 
   if (interaction.isModalSubmit()) {
