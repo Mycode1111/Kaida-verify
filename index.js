@@ -15,9 +15,21 @@ const {
 const editJsonFile = require("edit-json-file");
 const config = require("./config");
 const fs = require('fs');
+
 const client = new Client({
   intents: ["Guilds", "GuildMembers"],
 });
+
+// ฟังก์ชันเช็ก URL
+function isValidUrl(url) {
+  try {
+    if (!url || typeof url !== "string") return false;
+    new URL(url);
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
 
 client.on("ready", async () => {
   console.log("BOT online !");
@@ -25,45 +37,45 @@ client.on("ready", async () => {
   const embed = new EmbedBuilder()
     .setAuthor({
       name: `${config.main.title}`,
-      iconURL: `${config.main.iconURL}`,
-      url: null,
+      ...(isValidUrl(config.main.iconURL) && { iconURL: config.main.iconURL }),
     })
     .setDescription(`${config.main.Description}`)
     .setColor("Red")
     .setImage(`${config.main.image}`)
     .setFooter({
       text: `whitelist BOT`,
-      iconURL:
-        "", //รูปไอคอน
+      ...(isValidUrl(config.main.footerIconURL) && { iconURL: config.main.footerIconURL }),
     });
+
   const x = new ButtonBuilder()
     .setCustomId("buttonVerify")
     .setLabel(`${config.main.button_msg}`)
     .setEmoji(`${config.main.button_emoji}`)
     .setStyle(`${config.main.button_style}`);
+
   const row = new ActionRowBuilder().addComponents(x);
   const rawData = fs.readFileSync('id.json');
   const data = JSON.parse(rawData);
-  const channels = await client.channels.fetch(config.channelId)
+  const channels = await client.channels.fetch(config.channelId);
 
-  if(!data.messageID){
+  if (!data.messageID) {
     const message = await client.channels.cache
-    .get(channel)
-    .send({ embeds: [embed], components: [row] });
+      .get(channel)
+      .send({ embeds: [embed], components: [row] });
     data.messageID = message.id;
     const newData = JSON.stringify(data);
     fs.writeFileSync('id.json', newData);
-  }else{
+  } else {
     try {
-      const messages =  await channels.messages.fetch(data.messageID)
-      messages.edit({ embeds: [embed], components: [row] })
+      const messages = await channels.messages.fetch(data.messageID);
+      messages.edit({ embeds: [embed], components: [row] });
     } catch (s) {
       data.messageID = '';
       const newData = JSON.stringify(data);
       fs.writeFileSync('id.json', newData);
       await client.channels.cache
-    .get(channel)
-    .send({ embeds: [embed], components: [row] });
+        .get(channel)
+        .send({ embeds: [embed], components: [row] });
     }
   }
 });
@@ -76,7 +88,6 @@ client.on("interactionCreate", async (interaction) => {
         .setTitle(`${config.modals.title}`)
         .setCustomId("model_function");
 
-      //DEBUG MODALS
       let steam_link = new TextInputBuilder()
         .setCustomId("steam_link")
         .setLabel("ลิงค์สตรีม".substring(0, 100))
@@ -87,6 +98,7 @@ client.on("interactionCreate", async (interaction) => {
         .setCustomId("username_oc")
         .setLabel("ชื่อ OC ".substring(0, 45))
         .setStyle(TextInputStyle.Short);
+
       let username_ic = new TextInputBuilder()
         .setCustomId("username_ic")
         .setLabel("ชื่อ IC ".substring(0, 45))
@@ -112,7 +124,6 @@ client.on("interactionCreate", async (interaction) => {
       await interaction.showModal(lel);
     }
 
-    // funtion confirm roles
     if (interaction.customId == "addRoles") {
       interaction.deferUpdate();
       const WhitelistRole = `${config.WhitelistRole}`;
@@ -127,22 +138,19 @@ client.on("interactionCreate", async (interaction) => {
 
       const Cancel = new ButtonBuilder()
         .setCustomId("Cancel")
-        .setLabel("❌ ยกเลืก")
+        .setLabel("❌ ยกเลิก")
         .setStyle(ButtonStyle.Danger)
         .setDisabled(true);
+
       const row = new ActionRowBuilder().addComponents(addRoles, Cancel);
-      interaction.message.edit({
-        components: [row],
-      });
+      interaction.message.edit({ components: [row] });
     }
-    // funtion cancel roles
+
     if (interaction.customId == "Cancel") {
-      //ปุ่มหาย
-      interaction.message.edit({
-        components: [],
-      });
+      interaction.message.edit({ components: [] });
     }
   }
+
   if (interaction.isModalSubmit()) {
     try {
       const steam_link = interaction.fields.getTextInputValue("steam_link");
@@ -150,8 +158,10 @@ client.on("interactionCreate", async (interaction) => {
       const username_oc = interaction.fields.getTextInputValue("username_oc");
       const age_all = interaction.fields.getTextInputValue("age_oc");
       const facebook_ic = interaction.fields.getTextInputValue("facebook_ic");
+
       const m = interaction.member.user.username;
       console.log(m);
+
       let file = editJsonFile(`${process.cwd()}/config.json`);
       let data = file.get().data;
       let x = {
@@ -169,8 +179,7 @@ client.on("interactionCreate", async (interaction) => {
       const embed = new EmbedBuilder()
         .setAuthor({
           name: `${config.reply_submit.title}`,
-          iconURL: `${config.reply_submit.iconURL}`,
-          url: null,
+          ...(isValidUrl(config.reply_submit.iconURL) && { iconURL: config.reply_submit.iconURL }),
         })
         .setDescription(
           `${config.reply_submit.Description} <@&${config.roleAdmin}> `
@@ -178,8 +187,7 @@ client.on("interactionCreate", async (interaction) => {
         .setColor(`${config.reply_submit.colors}`)
         .setFooter({
           text: "whitelist BOT",
-          iconURL:
-            "",//รูปไอคอน
+          ...(isValidUrl(config.reply_submit.footerIconURL) && { iconURL: config.reply_submit.footerIconURL }),
         })
         .setTimestamp(Date.now());
 
@@ -201,20 +209,18 @@ client.on("interactionCreate", async (interaction) => {
           \`\`\`👤 ${age_all}\`\`\`
           เฟส IC
           [ลิงค์เฟส](${facebook_ic})
-        `
-        )
+        `)
         .setAuthor({
           name: `${config.reply_admin.title}`,
-          iconURL: `${config.reply_admin.iconURL}`,
-          url: null,
+          ...(isValidUrl(config.reply_admin.iconURL) && { iconURL: config.reply_admin.iconURL }),
         })
         .setColor("Green")
         .setFooter({
           text: "whitelist BOT",
-          iconURL:
-            "",//รูปไอคอน
+          ...(isValidUrl(config.reply_admin.footerIconURL) && { iconURL: config.reply_admin.footerIconURL }),
         })
         .setTimestamp(Date.now());
+
       const addRoles = new ButtonBuilder()
         .setCustomId("addRoles")
         .setLabel("✅ ยืนยัน")
@@ -222,7 +228,7 @@ client.on("interactionCreate", async (interaction) => {
 
       const Cancel = new ButtonBuilder()
         .setCustomId("Cancel")
-        .setLabel("❌ ยกเลืก")
+        .setLabel("❌ ยกเลิก")
         .setStyle(ButtonStyle.Danger);
 
       const rowx = new ActionRowBuilder().addComponents(addRoles, Cancel);
@@ -233,6 +239,7 @@ client.on("interactionCreate", async (interaction) => {
         components: [rowx],
         ephemeral: true,
       });
+
     } catch (e) {
       console.log(e);
     }
