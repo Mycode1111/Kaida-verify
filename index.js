@@ -106,21 +106,21 @@ client.on("interactionCreate", async (interaction) => {
         .setLabel("ชื่อเล่น")
         .setStyle(TextInputStyle.Short)
         .setRequired(true)
-        .setPlaceholder("กรอกชื่อเล่น"); // เพิ่มคำอธิบายที่นี่
+        .setPlaceholder("กรอกชื่อเล่นของคุณ"); // เพิ่มคำอธิบายที่นี่
 
       const inputAge = new TextInputBuilder()
         .setCustomId("age")
         .setLabel("อายุ")
         .setStyle(TextInputStyle.Short)
         .setRequired(true)
-        .setPlaceholder("กรอกอายุ"); // เพิ่มคำอธิบายที่นี่
+        .setPlaceholder("กรอกอายุของคุณ"); // เพิ่มคำอธิบายที่นี่
 
       const inputGame = new TextInputBuilder()
         .setCustomId("roblox")
         .setLabel("ชื่อในเกม")
         .setStyle(TextInputStyle.Short)
         .setRequired(true)
-        .setPlaceholder("กรอกชื่อในเกม ตัวอย่าง Songdo_Hxx(SHANKSCHIFFON)"); // เพิ่มคำอธิบายที่นี่
+        .setPlaceholder("กรอกชื่อในเกม ตัวอย่าง sadSadss (chiffon195)"); // เพิ่มคำอธิบายที่นี่
 
       modal.addComponents(
         new ActionRowBuilder().addComponents(inputName),
