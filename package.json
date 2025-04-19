@@ -1,0 +1,14 @@
+{
+  "name": "kaida-bot",
+  "version": "1.0.0",
+  "description": "My Discord Bot",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.0.0",
+    "express": "^4.18.2",
+    "dotenv": "^16.0.0"
+  }
+}
