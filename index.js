@@ -1,4 +1,4 @@
-require("dotenv").config();
+require("dotenv").config(); 
 const keepAlive = require('./keep_alive');
 keepAlive();
 
@@ -22,13 +22,22 @@ const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
 });
 
-
-client.on("ready", async () => {  // แก้ไขให้เป็น async function
+client.on("ready", async () => {
   console.log("บอทออนไลน์แล้ว!");
+
+  // ตั้งสถานะ Streaming สีม่วง
+  client.user.setPresence({
+    status: 'idle',
+    activities: [{
+      name: 'Kaida',
+      type: ActivityType.Streaming,
+      url: 'https://www.youtube.com/watch?v=bH3vMDK_Hn0'
+    }]
+  });
 
   const embed = new EmbedBuilder()
     .setAuthor({ name: config.main.title, iconURL: config.main.iconURL })
-    .setDescription(config.main.Description) // คำอธิบายสำหรับกรอกฟอร์ม
+    .setDescription(config.main.Description)
     .setColor(config.main.colors)
     .setImage(config.main.image)
     .setFooter({ text: "Kaida | Made by wasd", iconURL: config.main.footerIconURL });
@@ -185,20 +194,6 @@ client.on("interactionCreate", async (interaction) => {
       await interaction.update({ components: [] });
     }
   }
-
-const { Client, GatewayIntentBits, ActivityType } = require('discord.js');
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
-
-client.once('ready', () => {
-    console.log(`✅ Logged in as ${client.user.tag}`);
-    client.user.setPresence({
-        status: 'idle',
-        activities: [{
-            name: 'Kaida',
-            type: ActivityType.Streaming,
-            url: 'https://www.youtube.com/watch?v=bH3vMDK_Hn0'
-        }]
-    });
 });
 
 client.login(config.token);
