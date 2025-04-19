@@ -1,4 +1,4 @@
-require("dotenv").config();
+require("dotenv").config(); 
 const keepAlive = require('./keep_alive');
 keepAlive();
 
@@ -12,6 +12,8 @@ const {
   TextInputBuilder,
   TextInputStyle,
   GatewayIntentBits,
+  ActivityType,
+  Status,
 } = require("discord.js");
 
 const editJsonFile = require("edit-json-file");
@@ -34,20 +36,31 @@ const client = new Client({
   ],
 });
 
-client.on("ready", async () => {
-  console.log("บอทออนไลน์แล้ว!");
+// ข้อความที่ต้องการหมุนเปลี่ยน
+const customMessages = [
+  "Kaida Verify ready!💚",
+  "Made by wasd.",
+];
 
-  // ตั้งสถานะในโปรไฟล์ (Custom Status)
+// ตั้งค่าลูปหมุนข้อความทุก 5 วินาที
+let currentIndex = 0;
+const rotateCustomActivity = () => {
+  const currentMessage = customMessages[currentIndex];
   client.user.setPresence({
-    activities: [
-      {
-        name: "กำลังทำงานร่วมกับ Kaida Verify💚", // สถานะที่จะแสดงในโปรไฟล์
-        type: "CUSTOM_STATUS",  // ตั้งประเภทเป็น Custom Status
-      }
-    ],
-    status: "online",  // สถานะของบอทคือออนไลน์
+    activities: [{ name: currentMessage, type: ActivityType.Custom }],
+    status: Status.DND, // ตั้งค่าเป็น "ห้ามรบกวน" (Do Not Disturb)
   });
 
+  // เปลี่ยนไปยังข้อความถัดไปใน array
+  currentIndex = (currentIndex + 1) % customMessages.length;
+};
+
+// เริ่มหมุนสถานะ
+setInterval(rotateCustomActivity, 5000);  // เปลี่ยนสถานะทุกๆ 5 วินาที
+
+client.on("ready", async () => {
+  console.log("บอทออนไลน์แล้ว!");
+  rotateCustomActivity(); // เริ่มต้นหมุนสถานะทันทีหลังจากบอทออนไลน์
   client.user.setActivity("Kaida Verify💚", { type: 0 });
 
   const channel = await client.channels.fetch(config.channelId).catch(err => {
@@ -118,21 +131,21 @@ client.on("interactionCreate", async (interaction) => {
         .setLabel("ชื่อเล่น")
         .setStyle(TextInputStyle.Short)
         .setRequired(true)
-        .setPlaceholder("กรอกชื่อเล่นของคุณ");
+        .setPlaceholder("กรอกชื่อเล่นของคุณ"); // เพิ่มคำอธิบายที่นี่
 
       const inputAge = new TextInputBuilder()
         .setCustomId("age")
         .setLabel("อายุ")
         .setStyle(TextInputStyle.Short)
         .setRequired(true)
-        .setPlaceholder("กรอกอายุของคุณ");
+        .setPlaceholder("กรอกอายุของคุณ"); // เพิ่มคำอธิบายที่นี่
 
       const inputGame = new TextInputBuilder()
         .setCustomId("roblox")
         .setLabel("ชื่อในเกม")
         .setStyle(TextInputStyle.Short)
         .setRequired(true)
-        .setPlaceholder("กรอกชื่อในเกม ตัวอย่าง sadSadss (chiffon195)");
+        .setPlaceholder("กรอกชื่อในเกม ตัวอย่าง sadSadss (chiffon195)"); // เพิ่มคำอธิบายที่นี่
 
       modal.addComponents(
         new ActionRowBuilder().addComponents(inputName),
