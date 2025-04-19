@@ -1,6 +1,5 @@
-require('dotenv').config();  // โหลด environment variables 
+require('dotenv').config();
 const express = require('express');
-const app = express();
 const {
   Client,
   EmbedBuilder,
@@ -13,16 +12,22 @@ const {
   GatewayIntentBits,
 } = require("discord.js");
 const editJsonFile = require("edit-json-file");
+const config = require("./config");
 const fs = require("fs");
 
-// ✅ Keep alive server
-app.get('/', (req, res) => {
-  res.send('Bot is alive!');
-});
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`✅ Keep-alive server is running on port ${PORT}`);
-});
+// ✅ KEEP ALIVE FUNCTION
+function keepAlive() {
+  const app = express();
+  app.get('/', (req, res) => {
+    res.send('Bot is alive!');
+  });
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`✅ Keep-alive server running on port ${PORT}`);
+  });
+}
+
+keepAlive();
 
 const isValidUrl = (str) => {
   try {
@@ -44,23 +49,28 @@ client.on("ready", async () => {
   console.log("บอทออนไลน์แล้ว!");
   client.user.setActivity("Kaida Verify💚", { type: 0 });
 
-  const channel = await client.channels.fetch(process.env.CHANNEL_ID).catch(console.error);
+  const channel = await client.channels.fetch(config.channelId).catch(console.error);
   if (!channel) return;
 
+  const authorData = { name: `${config.main.title}` };
+  if (isValidUrl(config.main.iconURL)) authorData.iconURL = config.main.iconURL;
+  const footerData = { text: "Kaida | Made by wasd" };
+  if (isValidUrl(config.main.footerIconURL)) footerData.iconURL = config.main.footerIconURL;
+
   const embed = new EmbedBuilder()
-    .setAuthor({ name: "Kaida Verify" })
-    .setDescription("กดปุ่มเพื่อยืนยันตัวตน")
+    .setAuthor(authorData)
+    .setDescription(`${config.main.Description}`)
     .setColor("Red")
-    .setImage("https://i.imgur.com/your-image.png")
-    .setFooter({ text: "Kaida | Made by wasd" });
+    .setImage(`${config.main.image}`)
+    .setFooter(footerData);
 
-  const button = new ButtonBuilder()
+  const x = new ButtonBuilder()
     .setCustomId("buttonVerify")
-    .setLabel("ยืนยันตัวตน")
-    .setEmoji("✅")
-    .setStyle(ButtonStyle.Primary);
+    .setLabel(`${config.main.button_msg}`)
+    .setEmoji(`${config.main.button_emoji}`)
+    .setStyle(config.main.button_style);
 
-  const row = new ActionRowBuilder().addComponents(button);
+  const row = new ActionRowBuilder().addComponents(x);
 
   let data = {};
   try {
@@ -76,9 +86,9 @@ client.on("ready", async () => {
     fs.writeFileSync("id.json", JSON.stringify(data));
   } else {
     try {
-      const message = await channel.messages.fetch(data.messageID);
-      message.edit({ embeds: [embed], components: [row] });
-    } catch (e) {
+      const messages = await channel.messages.fetch(data.messageID);
+      messages.edit({ embeds: [embed], components: [row] });
+    } catch (s) {
       data.messageID = "";
       fs.writeFileSync("id.json", JSON.stringify(data));
       await channel.send({ embeds: [embed], components: [row] });
@@ -87,38 +97,40 @@ client.on("ready", async () => {
 });
 
 client.on("interactionCreate", async (interaction) => {
-  const logChannel = await client.channels.fetch(process.env.CHANNEL_ID_LOG).catch(console.error);
-  if (!logChannel) return;
+  const channel = await client.channels.fetch(config.channelId_Log).catch(console.error);
+  if (!channel) return;
 
-  if (interaction.isButton() && interaction.customId === "buttonVerify") {
-    const modal = new ModalBuilder()
-      .setTitle("ยืนยันตัวตน")
-      .setCustomId("model_function")
-      .addComponents(
-        new ActionRowBuilder().addComponents(
-          new TextInputBuilder()
-            .setCustomId("username")
-            .setLabel("ชื่อ")
-            .setStyle(TextInputStyle.Short)
-            .setRequired(true)
-        ),
-        new ActionRowBuilder().addComponents(
-          new TextInputBuilder()
-            .setCustomId("age")
-            .setLabel("อายุ")
-            .setStyle(TextInputStyle.Short)
-            .setRequired(true)
-        ),
-        new ActionRowBuilder().addComponents(
-          new TextInputBuilder()
-            .setCustomId("roblox")
-            .setLabel("ชื่อในเกม")
-            .setStyle(TextInputStyle.Short)
-            .setRequired(true)
-        )
+  if (interaction.isButton()) {
+    if (interaction.customId === "buttonVerify") {
+      const modal = new ModalBuilder().setTitle(config.modals.title).setCustomId("model_function");
+      const inputName = new TextInputBuilder().setCustomId("username").setLabel("ชื่อ").setStyle(TextInputStyle.Short).setRequired(true);
+      const inputAge = new TextInputBuilder().setCustomId("age").setLabel("อายุ").setStyle(TextInputStyle.Short).setRequired(true);
+      const inputGame = new TextInputBuilder().setCustomId("roblox").setLabel("ชื่อในเกม").setStyle(TextInputStyle.Short).setRequired(true);
+      modal.addComponents(
+        new ActionRowBuilder().addComponents(inputName),
+        new ActionRowBuilder().addComponents(inputAge),
+        new ActionRowBuilder().addComponents(inputGame)
+      );
+      await interaction.showModal(modal);
+    }
+
+    if (interaction.customId === "addRoles") {
+      interaction.deferUpdate();
+      const WhitelistRole = `${config.WhitelistRole}`;
+      const m = interaction.message?.mentions.members.first();
+      m.roles.add(WhitelistRole);
+
+      const row = new ActionRowBuilder().addComponents(
+        new ButtonBuilder().setCustomId("addRoles").setLabel("✅ ยืนยัน").setStyle(ButtonStyle.Primary).setDisabled(true),
+        new ButtonBuilder().setCustomId("Cancel").setLabel("❌ ยกเลิก").setStyle(ButtonStyle.Danger).setDisabled(true)
       );
 
-    await interaction.showModal(modal);
+      interaction.message.edit({ components: [row] });
+    }
+
+    if (interaction.customId === "Cancel") {
+      interaction.message.edit({ components: [] });
+    }
   }
 
   if (interaction.isModalSubmit()) {
@@ -138,53 +150,46 @@ client.on("interactionCreate", async (interaction) => {
       file.set("data", data);
       file.save();
 
+      const authorReplyData = { name: config.reply_submit.title };
+      if (isValidUrl(config.reply_submit.iconURL)) authorReplyData.iconURL = config.reply_submit.iconURL;
+      const footerReplyData = { text: "Kaida | Made by wasd" };
+      if (isValidUrl(config.reply_submit.footerIconURL)) footerReplyData.iconURL = config.reply_submit.footerIconURL;
+
       const embed = new EmbedBuilder()
-        .setAuthor({ name: "ส่งข้อมูลเรียบร้อย" })
-        .setDescription(`ข้อมูลของคุณถูกส่งไปยังแอดมินเรียบร้อยแล้ว <@&${process.env.ROLE_ADMIN}>`)
-        .setColor("Green")
-        .setFooter({ text: "Kaida | Made by wasd" })
-        .setTimestamp();
+        .setAuthor(authorReplyData)
+        .setDescription(`${config.reply_submit.Description} <@&${config.roleAdmin}>`)
+        .setColor(config.reply_submit.colors)
+        .setFooter(footerReplyData)
+        .setTimestamp(Date.now());
 
-      await interaction.reply({ embeds: [embed], ephemeral: true });
+      interaction.reply({ embeds: [embed], ephemeral: true });
 
-      const embedAdmin = new EmbedBuilder()
-        .setDescription(`# รายละเอียด\n**ดิสคอร์ดผู้ส่ง**\n<@${interaction.member?.id}>\n\nชื่อ\n\`👤 ${username}\`\nอายุ\n\`👤 ${age}\`\nชื่อในเกม\n\`👤 ${roblox}\``)
+      const authorAdminData = { name: config.reply_admin.title };
+      if (isValidUrl(config.reply_admin.iconURL)) authorAdminData.iconURL = config.reply_admin.iconURL;
+      const footerAdminData = { text: "Kaida" };
+      if (isValidUrl(config.reply_admin.footerIconURL)) footerAdminData.iconURL = config.reply_admin.footerIconURL;
+
+      const embedadmin = new EmbedBuilder()
+        .setDescription(`# รายละเอียด\n**ดิสคอร์ดผู้ส่ง**\n<@${interaction.member?.id}>\n\nชื่อ\n\\`\\`\\`👤 ${username}\\`\\`\\`\nอายุ\n\\`\\`\\`👤 ${age}\\`\\`\\`\nชื่อในเกม\n\\`\\`\\`👤 ${roblox}\\`\\`\\``)
+        .setAuthor(authorAdminData)
         .setColor("Red")
-        .setFooter({ text: "Kaida" })
-        .setTimestamp();
+        .setFooter(footerAdminData)
+        .setTimestamp(Date.now());
 
-      const row = new ActionRowBuilder().addComponents(
+      const rowx = new ActionRowBuilder().addComponents(
         new ButtonBuilder().setCustomId("addRoles").setLabel("✅ ยืนยัน").setStyle(ButtonStyle.Primary),
         new ButtonBuilder().setCustomId("Cancel").setLabel("❌ ยกเลิก").setStyle(ButtonStyle.Danger)
       );
 
-      await logChannel.send({
+      await channel.send({
         content: `ส่งข้อมูลโดย: <@${interaction.member?.id}>`,
-        embeds: [embedAdmin],
-        components: [row],
+        embeds: [embedadmin],
+        components: [rowx],
       });
     } catch (e) {
       console.error("เกิดข้อผิดพลาดใน modal submit:", e);
     }
   }
-
-  if (interaction.isButton()) {
-    if (interaction.customId === "addRoles") {
-      interaction.deferUpdate();
-      const member = interaction.message.mentions.members.first();
-      if (member) {
-        member.roles.add(process.env.WHITELIST_ROLE);
-      }
-      const row = new ActionRowBuilder().addComponents(
-        new ButtonBuilder().setCustomId("addRoles").setLabel("✅ ยืนยัน").setStyle(ButtonStyle.Primary).setDisabled(true),
-        new ButtonBuilder().setCustomId("Cancel").setLabel("❌ ยกเลิก").setStyle(ButtonStyle.Danger).setDisabled(true)
-      );
-      interaction.message.edit({ components: [row] });
-    }
-    if (interaction.customId === "Cancel") {
-      interaction.message.edit({ components: [] });
-    }
-  }
 });
 
-client.login(process.env.BOT_TOKEN);
+client.login(config.token);
