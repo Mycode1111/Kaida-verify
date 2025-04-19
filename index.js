@@ -186,16 +186,19 @@ client.on("interactionCreate", async (interaction) => {
     }
   }
 
-  @Override
-  public void onReady(ReadyEvent event) {
-      // เมื่อบอทพร้อมใช้งาน
-      System.out.println("✅ Logged in as " + event.getJDA().getSelfUser().getName());
+const { Client, GatewayIntentBits, ActivityType } = require('discord.js');
+const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
-      // ตั้งกิจกรรมให้บอท
-      event.getJDA().getPresence().setActivity(Activity.streaming("Kaida", "https://www.youtube.com/watch?v=bH3vMDK_Hn0"));
-      
-      // ตั้งสถานะของบอทเป็น Idle
-      event.getJDA().getPresence().setStatus(net.dv8tion.jda.api.entities.Status.IDLE);
+client.once('ready', () => {
+    console.log(`✅ Logged in as ${client.user.tag}`);
+    client.user.setPresence({
+        status: 'idle',
+        activities: [{
+            name: 'Kaida',
+            type: ActivityType.Streaming,
+            url: 'https://www.youtube.com/watch?v=bH3vMDK_Hn0'
+        }]
+    });
 });
 
 client.login(config.token);
