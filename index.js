@@ -1,5 +1,4 @@
 const keepAlive = require('./keep_alive');
-keepAlive();
 const {
   Client,
   EmbedBuilder,
@@ -14,6 +13,8 @@ const {
 const editJsonFile = require("edit-json-file");
 const config = require("./config");
 const fs = require("fs");
+
+keepAlive();
 
 const isValidUrl = (str) => {
   try {
