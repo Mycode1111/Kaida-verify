@@ -1,4 +1,3 @@
-
 require("dotenv").config();
 const keepAlive = require('./keep_alive');
 keepAlive();
@@ -146,10 +145,24 @@ client.on("interactionCreate", async (interaction) => {
         .setDescription(`ยืนยันแล้ว: ${username} (${roblox})`)
         .setColor("Green");
 
+      const addRolesButton = new ButtonBuilder()
+        .setCustomId("addRoles")
+        .setLabel("✅ ยืนยัน")
+        .setStyle(ButtonStyle.Primary)
+        .setDisabled(true); // ปิดปุ่มยืนยันหลังจากกด
+
+      const cancelButton = new ButtonBuilder()
+        .setCustomId("Cancel")
+        .setLabel("❌ ยกเลิก")
+        .setStyle(ButtonStyle.Danger)
+        .setDisabled(true); // ปิดปุ่มยกเลิกหลังจากกด
+
+      const row = new ActionRowBuilder().addComponents(addRolesButton, cancelButton);
+
       await interaction.update({
         content: "คำขอได้รับการยืนยันแล้ว!",
         embeds: [confirmEmbed],
-        components: [], // ปิดปุ่ม
+        components: [row], // ปิดปุ่ม
       });
     }
 
@@ -159,10 +172,24 @@ client.on("interactionCreate", async (interaction) => {
         .setDescription("คำขอถูกยกเลิก")
         .setColor("Red");
 
+      const addRolesButton = new ButtonBuilder()
+        .setCustomId("addRoles")
+        .setLabel("✅ ยืนยัน")
+        .setStyle(ButtonStyle.Primary)
+        .setDisabled(true); // ปิดปุ่มยืนยันหลังจากกด
+
+      const cancelButton = new ButtonBuilder()
+        .setCustomId("Cancel")
+        .setLabel("❌ ยกเลิก")
+        .setStyle(ButtonStyle.Danger)
+        .setDisabled(true); // ปิดปุ่มยกเลิกหลังจากกด
+
+      const row = new ActionRowBuilder().addComponents(addRolesButton, cancelButton);
+
       await interaction.update({
         content: "คำขอถูกยกเลิก",
         embeds: [cancelEmbed],
-        components: [], // ปิดปุ่ม
+        components: [row], // ปิดปุ่ม
       });
     }
   }
