@@ -103,24 +103,24 @@ client.on("interactionCreate", async (interaction) => {
       // เพิ่มคำอธิบายในการกรอกข้อมูล
       const inputName = new TextInputBuilder()
         .setCustomId("username")
-        .setLabel("ชื่อ")
+        .setLabel("ชื่อเล่น")
         .setStyle(TextInputStyle.Short)
         .setRequired(true)
-        .setPlaceholder("กรุณากรอกชื่อของคุณ"); // เพิ่มคำอธิบายที่นี่
+        .setPlaceholder("กรอกชื่อเล่น"); // เพิ่มคำอธิบายที่นี่
 
       const inputAge = new TextInputBuilder()
         .setCustomId("age")
         .setLabel("อายุ")
         .setStyle(TextInputStyle.Short)
         .setRequired(true)
-        .setPlaceholder("กรุณากรอกอายุของคุณ"); // เพิ่มคำอธิบายที่นี่
+        .setPlaceholder("กรอกอายุ"); // เพิ่มคำอธิบายที่นี่
 
       const inputGame = new TextInputBuilder()
         .setCustomId("roblox")
         .setLabel("ชื่อในเกม")
         .setStyle(TextInputStyle.Short)
         .setRequired(true)
-        .setPlaceholder("กรุณากรอกชื่อในเกมของคุณ"); // เพิ่มคำอธิบายที่นี่
+        .setPlaceholder("กรอกชื่อในเกม ตัวอย่าง Songdo_Hxx(SHANKSCHIFFON)"); // เพิ่มคำอธิบายที่นี่
 
       modal.addComponents(
         new ActionRowBuilder().addComponents(inputName),
