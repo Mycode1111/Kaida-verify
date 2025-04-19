@@ -48,7 +48,7 @@ const rotateCustomActivity = () => {
   const currentMessage = customMessages[currentIndex];
   client.user.setPresence({
     activities: [{ name: currentMessage, type: ActivityType.Custom }],
-    status: Status.DND, // ตั้งค่าเป็น "ห้ามรบกวน" (Do Not Disturb)
+    status: 'online', // ตั้งค่าเป็น "ออนไลน์" 
   });
 
   // เปลี่ยนไปยังข้อความถัดไปใน array
