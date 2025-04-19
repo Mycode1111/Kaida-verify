@@ -36,6 +36,18 @@ const client = new Client({
 
 client.on("ready", async () => {
   console.log("บอทออนไลน์แล้ว!");
+
+  // ตั้งสถานะในโปรไฟล์ (Custom Status)
+  client.user.setPresence({
+    activities: [
+      {
+        name: "กำลังทำงานร่วมกับ Kaida Verify💚", // สถานะที่จะแสดงในโปรไฟล์
+        type: "CUSTOM_STATUS",  // ตั้งประเภทเป็น Custom Status
+      }
+    ],
+    status: "online",  // สถานะของบอทคือออนไลน์
+  });
+
   client.user.setActivity("Kaida Verify💚", { type: 0 });
 
   const channel = await client.channels.fetch(config.channelId).catch(err => {
@@ -106,21 +118,21 @@ client.on("interactionCreate", async (interaction) => {
         .setLabel("ชื่อเล่น")
         .setStyle(TextInputStyle.Short)
         .setRequired(true)
-        .setPlaceholder("กรอกชื่อเล่นของคุณ"); // เพิ่มคำอธิบายที่นี่
+        .setPlaceholder("กรอกชื่อเล่นของคุณ");
 
       const inputAge = new TextInputBuilder()
         .setCustomId("age")
         .setLabel("อายุ")
         .setStyle(TextInputStyle.Short)
         .setRequired(true)
-        .setPlaceholder("กรอกอายุของคุณ"); // เพิ่มคำอธิบายที่นี่
+        .setPlaceholder("กรอกอายุของคุณ");
 
       const inputGame = new TextInputBuilder()
         .setCustomId("roblox")
         .setLabel("ชื่อในเกม")
         .setStyle(TextInputStyle.Short)
         .setRequired(true)
-        .setPlaceholder("กรอกชื่อในเกม ตัวอย่าง sadSadss (chiffon195)"); // เพิ่มคำอธิบายที่นี่
+        .setPlaceholder("กรอกชื่อในเกม ตัวอย่าง sadSadss (chiffon195)");
 
       modal.addComponents(
         new ActionRowBuilder().addComponents(inputName),
@@ -130,8 +142,6 @@ client.on("interactionCreate", async (interaction) => {
 
       await interaction.showModal(modal);
     }
-
-    // Logic อื่น ๆ ที่มีอยู่
   }
 
   if (interaction.isModalSubmit()) {
