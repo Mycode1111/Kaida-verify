@@ -102,7 +102,6 @@ client.on("interactionCreate", async (interaction) => {
     if (interaction.customId === "buttonVerify") {
       const modal = new ModalBuilder().setTitle(config.modals.title).setCustomId("model_function");
 
-      // เพิ่มคำอธิบายในการกรอกข้อมูล
       const inputName = new TextInputBuilder()
         .setCustomId("username")
         .setLabel("ชื่อเล่น")
@@ -135,16 +134,30 @@ client.on("interactionCreate", async (interaction) => {
 
     // เช็คปุ่ม "✅ ยืนยัน"
     if (interaction.customId === "addRoles") {
-      await interaction.reply({ content: "ยืนยันแล้ว!", ephemeral: true });
-
-      // สามารถเพิ่มการให้ role หรือการกระทำอื่นๆ เมื่อกดปุ่มยืนยันที่นี่
+      try {
+        // ดึงสมาชิกจาก Guild
+        const member = await interaction.guild.members.fetch(interaction.user.id);
+        
+        // ตรวจสอบว่ามี role ที่ต้องการแล้วหรือไม่
+        const role = await interaction.guild.roles.fetch(config.roleId); // ใส่ role ID ของคุณที่ต้องการเพิ่ม
+        if (role) {
+          // เพิ่ม role ให้สมาชิก
+          await member.roles.add(role);
+          
+          // ตอบกลับว่าผู้ใช้ได้รับยศ
+          await interaction.reply({ content: "ยืนยันแล้ว! คุณได้รับยศแล้ว!", ephemeral: true });
+        } else {
+          await interaction.reply({ content: "ไม่พบยศที่ต้องการ", ephemeral: true });
+        }
+      } catch (err) {
+        console.error("ไม่สามารถเพิ่มยศได้:", err);
+        await interaction.reply({ content: "เกิดข้อผิดพลาดในการเพิ่มยศ", ephemeral: true });
+      }
     }
 
     // เช็คปุ่ม "❌ ยกเลิก"
     if (interaction.customId === "Cancel") {
       await interaction.reply({ content: "ยกเลิกการยืนยัน", ephemeral: true });
-
-      // สามารถเพิ่มการยกเลิกการกระทำต่างๆ ที่ต้องการเมื่อกดปุ่มยกเลิกที่นี่
     }
   }
 
