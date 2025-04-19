@@ -1,4 +1,5 @@
-require("dotenv").config(); 
+
+require("dotenv").config();
 const keepAlive = require('./keep_alive');
 keepAlive();
 
@@ -11,219 +12,195 @@ const {
   ModalBuilder,
   TextInputBuilder,
   TextInputStyle,
+  GatewayIntentBits,
 } = require("discord.js");
+
 const editJsonFile = require("edit-json-file");
 const config = require("./config");
-const fs = require('fs');
+const fs = require("fs");
 
-const client = new Client({
-  intents: ["Guilds", "GuildMembers"],
-});
-
-// ฟังก์ชันเช็ก URL
-function isValidUrl(url) {
+const isValidUrl = (str) => {
   try {
-    if (!url || typeof url !== "string") return false;
-    new URL(url);
+    new URL(str);
     return true;
   } catch (_) {
     return false;
   }
-}
+};
+
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers,
+  ],
+});
 
 client.on("ready", async () => {
-  console.log("BOT online !");
-  let channel = `${config.channelId}`;
+  console.log("บอทออนไลน์แล้ว!");
+  client.user.setActivity("Kaida Verify💚", { type: 0 });
 
-  // ✅ ถ้าไม่มี id.json ให้สร้างใหม่
-  const idJsonPath = 'id.json';
-  if (!fs.existsSync(idJsonPath)) {
-    fs.writeFileSync(idJsonPath, JSON.stringify({ messageID: "" }, null, 2));
-  }
+  const channel = await client.channels.fetch(config.channelId).catch(err => {
+    console.error("ไม่สามารถโหลด channel:", err);
+    return null;
+  });
+  if (!channel) return;
+
+  const authorData = { name: config.main.title };
+  if (isValidUrl(config.main.iconURL)) authorData.iconURL = config.main.iconURL;
+
+  const footerData = { text: "Kaida | Made by wasd" };
+  if (isValidUrl(config.main.footerIconURL)) footerData.iconURL = config.main.footerIconURL;
 
   const embed = new EmbedBuilder()
-    .setAuthor({
-      name: `${config.main.title}`,
-      ...(isValidUrl(config.main.iconURL) && { iconURL: config.main.iconURL }),
-    })
-    .setDescription(`${config.main.Description}`)
+    .setAuthor(authorData)
+    .setDescription(config.main.Description)
     .setColor("Red")
-    .setImage(`${config.main.image}`)
-    .setFooter({
-      text: `whitelist BOT`,
-      ...(isValidUrl(config.main.footerIconURL) && { iconURL: config.main.footerIconURL }),
-    });
+    .setImage(config.main.image)
+    .setFooter(footerData);
 
-  const x = new ButtonBuilder()
+  const button = new ButtonBuilder()
     .setCustomId("buttonVerify")
-    .setLabel(`${config.main.button_msg}`)
-    .setEmoji(`${config.main.button_emoji}`)
-    .setStyle(`${config.main.button_style}`);
+    .setLabel(config.main.button_msg)
+    .setEmoji(config.main.button_emoji)
+    .setStyle(config.main.button_style);
 
-  const row = new ActionRowBuilder().addComponents(x);
-  const rawData = fs.readFileSync(idJsonPath);
-  const data = JSON.parse(rawData);
-  const channels = await client.channels.fetch(config.channelId);
+  const row = new ActionRowBuilder().addComponents(button);
+
+  let data = {};
+  try {
+    const rawData = fs.readFileSync("id.json");
+    data = JSON.parse(rawData);
+  } catch {
+    data = { messageID: "" };
+  }
 
   if (!data.messageID) {
-    const message = await client.channels.cache
-      .get(channel)
-      .send({ embeds: [embed], components: [row] });
+    const message = await channel.send({ embeds: [embed], components: [row] });
     data.messageID = message.id;
-    fs.writeFileSync(idJsonPath, JSON.stringify(data, null, 2));
+    fs.writeFileSync("id.json", JSON.stringify(data));
   } else {
     try {
-      const messages = await channels.messages.fetch(data.messageID);
-      messages.edit({ embeds: [embed], components: [row] });
-    } catch (s) {
-      data.messageID = '';
-      fs.writeFileSync(idJsonPath, JSON.stringify(data, null, 2));
-      await client.channels.cache
-        .get(channel)
-        .send({ embeds: [embed], components: [row] });
+      const message = await channel.messages.fetch(data.messageID);
+      message.edit({ embeds: [embed], components: [row] });
+    } catch {
+      data.messageID = "";
+      fs.writeFileSync("id.json", JSON.stringify(data));
+      await channel.send({ embeds: [embed], components: [row] });
     }
   }
 });
 
 client.on("interactionCreate", async (interaction) => {
-  let channel = `${config.channelId_Log}`;
-  
-  // กรณีกดปุ่ม Verify
+  const logChannel = await client.channels.fetch(config.channelId_Log).catch(err => {
+    console.error("ไม่สามารถโหลด log channel:", err);
+    return null;
+  });
+  if (!logChannel) return;
+
   if (interaction.isButton()) {
-    if (interaction.customId == "buttonVerify") {
-      let lel = new ModalBuilder()
-        .setTitle(`${config.modals.title}`)
-        .setCustomId("model_function");
+    if (interaction.customId === "buttonVerify") {
+      const modal = new ModalBuilder().setTitle(config.modals.title).setCustomId("model_function");
 
-      let steam_link = new TextInputBuilder()
-        .setCustomId("steam_link")
-        .setLabel("ลิงค์สตรีม".substring(0, 100))
+      // เพิ่มคำอธิบายในการกรอกข้อมูล
+      const inputName = new TextInputBuilder()
+        .setCustomId("username")
+        .setLabel("ชื่อเล่น")
         .setStyle(TextInputStyle.Short)
-        .setRequired(true);
+        .setRequired(true)
+        .setPlaceholder("กรอกชื่อเล่นของคุณ"); // เพิ่มคำอธิบายที่นี่
 
-      let username_oc = new TextInputBuilder()
-        .setCustomId("username_oc")
-        .setLabel("ชื่อ OC ".substring(0, 45))
-        .setStyle(TextInputStyle.Short);
-
-      let username_ic = new TextInputBuilder()
-        .setCustomId("username_ic")
-        .setLabel("ชื่อ IC ".substring(0, 45))
-        .setStyle(TextInputStyle.Short);
-
-      let age_oc = new TextInputBuilder()
-        .setCustomId("age_oc")
-        .setLabel("อายุ OC IC".substring(0, 45))
-        .setStyle(TextInputStyle.Paragraph);
-
-      let facebook_ic = new TextInputBuilder()
-        .setCustomId("facebook_ic")
-        .setLabel("เฟส IC".substring(0, 45))
+      const inputAge = new TextInputBuilder()
+        .setCustomId("age")
+        .setLabel("อายุ")
         .setStyle(TextInputStyle.Short)
-        .setRequired(true);
+        .setRequired(true)
+        .setPlaceholder("กรอกอายุของคุณ"); // เพิ่มคำอธิบายที่นี่
 
-      let row_all = new ActionRowBuilder().addComponents(steam_link);
-      let row_all2 = new ActionRowBuilder().addComponents(username_oc);
-      let row_all3 = new ActionRowBuilder().addComponents(age_oc);
-      let row_all5 = new ActionRowBuilder().addComponents(username_ic);
-      let row_all4 = new ActionRowBuilder().addComponents(facebook_ic);
-      lel.addComponents(row_all, row_all2, row_all5, row_all3, row_all4);
-      await interaction.showModal(lel);
+      const inputGame = new TextInputBuilder()
+        .setCustomId("roblox")
+        .setLabel("ชื่อในเกม")
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true)
+        .setPlaceholder("กรอกชื่อในเกม ตัวอย่าง sadSadss (chiffon195)"); // เพิ่มคำอธิบายที่นี่
+
+      modal.addComponents(
+        new ActionRowBuilder().addComponents(inputName),
+        new ActionRowBuilder().addComponents(inputAge),
+        new ActionRowBuilder().addComponents(inputGame)
+      );
+
+      await interaction.showModal(modal);
     }
+
+    // Logic อื่น ๆ ที่มีอยู่
   }
 
-  // การจัดการ Modal Submit
   if (interaction.isModalSubmit()) {
     try {
-      const steam_link = interaction.fields.getTextInputValue("steam_link");
-      const username_ic = interaction.fields.getTextInputValue("username_ic");
-      const username_oc = interaction.fields.getTextInputValue("username_oc");
-      const age_all = interaction.fields.getTextInputValue("age_oc");
-      const facebook_ic = interaction.fields.getTextInputValue("facebook_ic");
+      const username = interaction.fields.getTextInputValue("username");
+      const age = interaction.fields.getTextInputValue("age");
+      const roblox = interaction.fields.getTextInputValue("roblox");
 
-      const m = interaction.member.user.username;
-      console.log(m);
-
-      let file = editJsonFile(`${process.cwd()}/config.json`);
-      let data = file.get().data;
-      let x = {
+      const file = editJsonFile(`${process.cwd()}/config.json`);
+      const formData = file.get().data || [];
+      formData.push({
         ชื่อดิสคอร์ด: `${interaction.member.user.username}#${interaction.member.user.discriminator}`,
-        สตรีมลิงค์: steam_link,
-        "ชื่อ OC": username_oc,
-        "ชื่อ IC": username_ic,
-        "อายุ OC IC": age_all,
-        "เฟส IC": facebook_ic,
-      };
-      data.push(x);
-      file.set("data", data);
+        ชื่อ: username,
+        อายุ: age,
+        ชื่อในเกม: roblox,
+      });
+      file.set("data", formData);
       file.save();
 
-      const embed = new EmbedBuilder()
-        .setAuthor({
-          name: `${config.reply_submit.title}`,
-          ...(isValidUrl(config.reply_submit.iconURL) && { iconURL: config.reply_submit.iconURL }),
-        })
-        .setDescription(
-          `${config.reply_submit.Description} <@&${config.roleAdmin}> `
-        )
-        .setColor(`${config.reply_submit.colors}`)
-        .setFooter({
-          text: "whitelist BOT",
-          ...(isValidUrl(config.reply_submit.footerIconURL) && { iconURL: config.reply_submit.footerIconURL }),
-        })
-        .setTimestamp(Date.now());
+      const authorReplyData = { name: config.reply_submit.title };
+      if (isValidUrl(config.reply_submit.iconURL)) authorReplyData.iconURL = config.reply_submit.iconURL;
 
-      interaction.reply({
-        embeds: [embed],
-        ephemeral: true,
-      });
+      const footerReplyData = { text: "Kaida | Made by wasd" };
+      if (isValidUrl(config.reply_submit.footerIconURL)) footerReplyData.iconURL = config.reply_submit.footerIconURL;
 
-      const embedadmin = new EmbedBuilder()
-        .setDescription(
-          `** ข้อมูลทั้งหมด**\n
-          **ดิสคอร์ดของผู้ส่ง**\n
-          <@${interaction.member?.id}>\n
-          ลิงค์สตรีม
-          \`\`\`🔗 ${steam_link}\`\`\`
-          ชื่อ OC IC
-          \`\`\`👤 ${username_oc} & ${username_ic}\`\`\`
-          อายุ OC IC
-          \`\`\`👤 ${age_all}\`\`\`
-          เฟส IC
-          [ลิงค์เฟส](${facebook_ic})
-        `)
-        .setAuthor({
-          name: `${config.reply_admin.title}`,
-          ...(isValidUrl(config.reply_admin.iconURL) && { iconURL: config.reply_admin.iconURL }),
-        })
-        .setColor("Green")
-        .setFooter({
-          text: "whitelist BOT",
-          ...(isValidUrl(config.reply_admin.footerIconURL) && { iconURL: config.reply_admin.footerIconURL }),
-        })
-        .setTimestamp(Date.now());
+      const userEmbed = new EmbedBuilder()
+        .setAuthor(authorReplyData)
+        .setDescription(`${config.reply_submit.Description} <@&${config.roleAdmin}>`)
+        .setColor(config.reply_submit.colors)
+        .setFooter(footerReplyData)
+        .setTimestamp();
 
-      const addRoles = new ButtonBuilder()
-        .setCustomId("addRoles")
-        .setLabel("✅ ยืนยัน")
-        .setStyle(ButtonStyle.Primary);
+      await interaction.reply({ embeds: [userEmbed], ephemeral: true });
 
-      const Cancel = new ButtonBuilder()
-        .setCustomId("Cancel")
-        .setLabel("❌ ยกเลิก")
-        .setStyle(ButtonStyle.Danger);
+      const authorAdminData = { name: config.reply_admin.title };
+      if (isValidUrl(config.reply_admin.iconURL)) authorAdminData.iconURL = config.reply_admin.iconURL;
 
-      const rowx = new ActionRowBuilder().addComponents(addRoles, Cancel);
+      const footerAdminData = { text: "Kaida" };
+      if (isValidUrl(config.reply_admin.footerIconURL)) footerAdminData.iconURL = config.reply_admin.footerIconURL;
 
-      interaction.guild.channels.cache.get(channel).send({
+      const adminEmbed = new EmbedBuilder()
+        .setDescription(`# รายละเอียด
+**ดิสคอร์ดผู้ส่ง**
+<@${interaction.member?.id}>
+
+ชื่อ
+\`\`\`👤 ${username}\`\`\`
+อายุ
+\`\`\`👤 ${age}\`\`\`
+ชื่อในเกม
+\`\`\`👤 ${roblox}\`\`\``)
+        .setAuthor(authorAdminData)
+        .setColor("Red")
+        .setFooter(footerAdminData)
+        .setTimestamp();
+
+      const rowx = new ActionRowBuilder().addComponents(
+        new ButtonBuilder().setCustomId("addRoles").setLabel("✅ ยืนยัน").setStyle(ButtonStyle.Primary),
+        new ButtonBuilder().setCustomId("Cancel").setLabel("❌ ยกเลิก").setStyle(ButtonStyle.Danger)
+      );
+
+      await logChannel.send({
         content: `ส่งข้อมูลโดย: <@${interaction.member?.id}>`,
-        embeds: [embedadmin],
+        embeds: [adminEmbed],
         components: [rowx],
-        ephemeral: true,
       });
-
     } catch (e) {
-      console.log(e);
+      console.error("เกิดข้อผิดพลาดใน modal submit:", e);
     }
   }
 });
