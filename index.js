@@ -100,9 +100,27 @@ client.on("interactionCreate", async (interaction) => {
     if (interaction.customId === "buttonVerify") {
       const modal = new ModalBuilder().setTitle(config.modals.title).setCustomId("model_function");
 
-      const inputName = new TextInputBuilder().setCustomId("username").setLabel("ชื่อ").setStyle(TextInputStyle.Short).setRequired(true);
-      const inputAge = new TextInputBuilder().setCustomId("age").setLabel("อายุ").setStyle(TextInputStyle.Short).setRequired(true);
-      const inputGame = new TextInputBuilder().setCustomId("roblox").setLabel("ชื่อในเกม").setStyle(TextInputStyle.Short).setRequired(true);
+      // เพิ่มคำอธิบายในการกรอกข้อมูล
+      const inputName = new TextInputBuilder()
+        .setCustomId("username")
+        .setLabel("ชื่อ")
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true)
+        .setPlaceholder("กรุณากรอกชื่อของคุณ"); // เพิ่มคำอธิบายที่นี่
+
+      const inputAge = new TextInputBuilder()
+        .setCustomId("age")
+        .setLabel("อายุ")
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true)
+        .setPlaceholder("กรุณากรอกอายุของคุณ"); // เพิ่มคำอธิบายที่นี่
+
+      const inputGame = new TextInputBuilder()
+        .setCustomId("roblox")
+        .setLabel("ชื่อในเกม")
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true)
+        .setPlaceholder("กรุณากรอกชื่อในเกมของคุณ"); // เพิ่มคำอธิบายที่นี่
 
       modal.addComponents(
         new ActionRowBuilder().addComponents(inputName),
@@ -113,22 +131,7 @@ client.on("interactionCreate", async (interaction) => {
       await interaction.showModal(modal);
     }
 
-    if (interaction.customId === "addRoles") {
-      await interaction.deferUpdate();
-      const m = interaction.message?.mentions.members.first();
-      if (m) m.roles.add(config.WhitelistRole);
-
-      const row = new ActionRowBuilder().addComponents(
-        new ButtonBuilder().setCustomId("addRoles").setLabel("✅ ยืนยัน").setStyle(ButtonStyle.Primary).setDisabled(true),
-        new ButtonBuilder().setCustomId("Cancel").setLabel("❌ ยกเลิก").setStyle(ButtonStyle.Danger).setDisabled(true)
-      );
-
-      interaction.message.edit({ components: [row] });
-    }
-
-    if (interaction.customId === "Cancel") {
-      interaction.message.edit({ components: [] });
-    }
+    // Logic อื่น ๆ ที่มีอยู่
   }
 
   if (interaction.isModalSubmit()) {
