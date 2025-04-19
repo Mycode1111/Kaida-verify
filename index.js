@@ -1,4 +1,4 @@
-require("dotenv").config();
+require("dotenv").config(); 
 const keepAlive = require('./keep_alive');
 keepAlive();
 
@@ -87,6 +87,8 @@ client.on("ready", async () => {
 
 client.on("interactionCreate", async (interaction) => {
   let channel = `${config.channelId_Log}`;
+  
+  // กรณีกดปุ่ม Verify
   if (interaction.isButton()) {
     if (interaction.customId == "buttonVerify") {
       let lel = new ModalBuilder()
@@ -128,34 +130,9 @@ client.on("interactionCreate", async (interaction) => {
       lel.addComponents(row_all, row_all2, row_all5, row_all3, row_all4);
       await interaction.showModal(lel);
     }
-
-    if (interaction.customId == "addRoles") {
-      interaction.deferUpdate();
-      const WhitelistRole = `${config.WhitelistRole}`;
-      const m = interaction.message?.mentions.members.first();
-      m.roles.add(WhitelistRole);
-
-      const addRoles = new ButtonBuilder()
-        .setCustomId("addRoles")
-        .setLabel("✅ ยืนยัน")
-        .setStyle(ButtonStyle.Primary)
-        .setDisabled(true);
-
-      const Cancel = new ButtonBuilder()
-        .setCustomId("Cancel")
-        .setLabel("❌ ยกเลิก")
-        .setStyle(ButtonStyle.Danger)
-        .setDisabled(true);
-
-      const row = new ActionRowBuilder().addComponents(addRoles, Cancel);
-      interaction.message.edit({ components: [row] });
-    }
-
-    if (interaction.customId == "Cancel") {
-      interaction.message.edit({ components: [] });
-    }
   }
 
+  // การจัดการ Modal Submit
   if (interaction.isModalSubmit()) {
     try {
       const steam_link = interaction.fields.getTextInputValue("steam_link");
