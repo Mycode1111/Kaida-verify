@@ -1,3 +1,4 @@
+require('dotenv').config();  // โหลด environment variables
 const keepAlive = require('./keep_alive');
 const {
   Client,
