@@ -98,6 +98,7 @@ client.on("interactionCreate", async (interaction) => {
   if (!logChannel) return;
 
   if (interaction.isButton()) {
+    // เช็คว่าเป็นปุ่ม "buttonVerify" หรือไม่
     if (interaction.customId === "buttonVerify") {
       const modal = new ModalBuilder().setTitle(config.modals.title).setCustomId("model_function");
 
@@ -107,21 +108,21 @@ client.on("interactionCreate", async (interaction) => {
         .setLabel("ชื่อเล่น")
         .setStyle(TextInputStyle.Short)
         .setRequired(true)
-        .setPlaceholder("กรอกชื่อเล่นของคุณ"); // เพิ่มคำอธิบายที่นี่
+        .setPlaceholder("กรอกชื่อเล่นของคุณ");
 
       const inputAge = new TextInputBuilder()
         .setCustomId("age")
         .setLabel("อายุ")
         .setStyle(TextInputStyle.Short)
         .setRequired(true)
-        .setPlaceholder("กรอกอายุของคุณ"); // เพิ่มคำอธิบายที่นี่
+        .setPlaceholder("กรอกอายุของคุณ");
 
       const inputGame = new TextInputBuilder()
         .setCustomId("roblox")
         .setLabel("ชื่อในเกม")
         .setStyle(TextInputStyle.Short)
         .setRequired(true)
-        .setPlaceholder("กรอกชื่อในเกม ตัวอย่าง sadSadss (chiffon195)"); // เพิ่มคำอธิบายที่นี่
+        .setPlaceholder("กรอกชื่อในเกม ตัวอย่าง sadSadss (chiffon195)");
 
       modal.addComponents(
         new ActionRowBuilder().addComponents(inputName),
@@ -132,9 +133,22 @@ client.on("interactionCreate", async (interaction) => {
       await interaction.showModal(modal);
     }
 
-    // Logic อื่น ๆ ที่มีอยู่
+    // เช็คปุ่ม "✅ ยืนยัน"
+    if (interaction.customId === "addRoles") {
+      await interaction.reply({ content: "ยืนยันแล้ว!", ephemeral: true });
+
+      // สามารถเพิ่มการให้ role หรือการกระทำอื่นๆ เมื่อกดปุ่มยืนยันที่นี่
+    }
+
+    // เช็คปุ่ม "❌ ยกเลิก"
+    if (interaction.customId === "Cancel") {
+      await interaction.reply({ content: "ยกเลิกการยืนยัน", ephemeral: true });
+
+      // สามารถเพิ่มการยกเลิกการกระทำต่างๆ ที่ต้องการเมื่อกดปุ่มยกเลิกที่นี่
+    }
   }
 
+  // เช็คเมื่อมีการส่งข้อมูลจาก Modal
   if (interaction.isModalSubmit()) {
     try {
       const username = interaction.fields.getTextInputValue("username");
