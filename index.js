@@ -117,7 +117,10 @@ client.on("interactionCreate", async (interaction) => {
       const embed = new EmbedBuilder()
         .setDescription(`${config.reply_submit.Description} <@&${config.roleAdmin}>`)
         .setColor("Blue")
-        .setFooter({ text: "Kaida | Made by wasd" })
+        .setFooter({
+          text: "Kaida | Made by wasd",
+          iconURL: config.main.footerIconURL
+        })
         .setTimestamp();
 
       await interaction.reply({ embeds: [embed], ephemeral: true });
