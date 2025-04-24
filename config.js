@@ -10,7 +10,7 @@ module.exports = {
   main: {
     button_msg: "Kaida",
     button_emoji: "<:Kaida:1359680149074870352>",
-    button_style: ButtonStyle.Danger,
+    button_style: ButtonStyle.Secondary,
     title: "บอทกรอกข้อมูล",
     iconURL: "https://cdn.discordapp.com/attachments/1038838432434229328/1362069141296779394/Kaida_logo.png",
     footerIconURL: "https://cdn.discordapp.com/attachments/1038838432434229328/1362069141296779394/Kaida_logo.png",
