@@ -14,7 +14,7 @@ module.exports = {
     title: "บอทกรอกข้อมูล",
     iconURL: "https://cdn.discordapp.com/attachments/1038838432434229328/1362069141296779394/Kaida_logo.png",
     footerIconURL: "https://cdn.discordapp.com/attachments/1038838432434229328/1362069141296779394/Kaida_logo.png",
-    Description: "-# แบบฟอร์มกรอกข้อมูล \n<a:3732newspapercat:1334048896711790603> **กรุณาอ่านกฎก่อนดำเนินการกรอกข้อมูล** <a:3732newspapercat:1334048896711790603> \n```⚠️ ข้อมูลที่กรอกต้องถูกต้องและครบถ้วน ⚠️```",
+    Description: "**แบบฟอร์มกรอกข้อมูล** \n:pencil: **กรุณาอ่านกฎก่อนดำเนินการกรอกข้อมูล** \n```⚠️ ข้อมูลที่กรอกต้องถูกต้องและครบถ้วน ⚠️```",
     colors: "#e51c23",
     image: "https://cdn.discordapp.com/attachments/1038838432434229328/1362069141296779394/Kaida_logo.png",
   },
