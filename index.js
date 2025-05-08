@@ -29,7 +29,7 @@ client.on("ready", async () => {
   client.user.setPresence({
     status: 'idle',
     activities: [{
-      name: 'Kaida Verify ready!💚',
+      name: 'Bot ready!💚',
       type: ActivityType.Streaming,
       url: 'https://www.youtube.com/watch?v=bH3vMDK_Hn0'
     }]
