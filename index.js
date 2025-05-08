@@ -40,7 +40,7 @@ client.on("ready", async () => {
     .setDescription(config.main.Description)
     .setColor(config.main.colors)
     .setImage(config.main.image)
-    .setFooter({ text: "Kaida | Made by wasd", iconURL: config.main.footerIconURL });
+    .setFooter({ text: "Kaida | Made by null", iconURL: config.main.footerIconURL });
 
   const button = new ButtonBuilder()
     .setCustomId("buttonVerify")
