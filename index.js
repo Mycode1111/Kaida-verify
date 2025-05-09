@@ -118,7 +118,7 @@ client.on("interactionCreate", async (interaction) => {
         .setDescription(`${config.reply_submit.Description} <@&${config.roleAdmin}>`)
         .setColor("Blue")
         .setFooter({
-          text: "Kaida | Made by wasd",
+          text: "Kaida | Made by null",
           iconURL: config.main.footerIconURL
         })
         .setTimestamp();
