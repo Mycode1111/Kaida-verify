@@ -139,7 +139,7 @@ client.on("interactionCreate", async (interaction) => {
         )
         .setColor("Blue")
         .setFooter({
-          text: "Kaida | Made by wasd",
+          text: "Kaida | Made by null",
           iconURL: config.main.footerIconURL
         })
         .setTimestamp();
